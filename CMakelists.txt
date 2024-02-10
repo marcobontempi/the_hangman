@@ -1,0 +1,144 @@
+###############################################################################
+#
+# CMakelists.txt
+#
+# version   : 1.0
+# topic     : C++
+# class     : cmake file
+# author    : Marco Bontempi
+# created   : 02-Jan-2024
+#
+# abstract:
+#  compile the hangman game project
+#
+#------------------------------------------------------------------------------
+# 2021-2024 by Marco Bontempi <marco.bontempi@gmail.com>.
+#
+# Redistribution  and   use  in   source  and  binary  forms,  with  or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source  code  must  retain the  above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form  must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in  the documentation
+#    and/or other materials provided with the distribution.
+# 3. Redistribution in any form  must include the references associated to this
+#    code  in  the  documentation  and/or  other materials  provided  with  the
+#    distribution.
+#
+# THIS SOFTWARE  IS PROVIDED BY THE AUTHOR AND  CONTRIBUTORS ``AS IS''  AND ANY
+# EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING, BUT  NOT  LIMITED TO, THE IMPLIED
+# WARRANTIES  OF  MERCHANTABILITY AND  FITNESS  FOR  A  PARTICULAR PURPOSE  ARE
+# DISCLAIMED. IN NO  EVENT  SHALL THE AUTHOR OR CONTRIBUTORS  BE LIABLE FOR ANY
+# DIRECT,  INDIRECT,  INCIDENTAL, SPECIAL,  EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING,  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION)  HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN  CONTRACT, STRICT LIABILITY,  OR  TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+###############################################################################
+
+# cmake header file
+cmake_minimum_required(VERSION 3.27)
+
+#=== FUNCTIONS/MACROS =========================================================
+#==============================================================================
+
+# add_apple_framework 
+#------------------------------------------------------------------------------
+macro(add_apple_framework framework_name)
+    if(APPLE)
+        # search apple framework
+        find_library(F_NAME framework_name)
+        if (NOT F_NAME)
+            message(FATAL_ERROR "Framework not found")
+        endif()
+        # link the specified framework
+        target_link_libraries(${PROJECT_NAME} ${F_NAME})
+    else()
+        message(FATAL_ERROR "Frameworks are unavailable for this OS")
+    endif()
+endmacro()    
+
+
+#=== USER VARIABLES ===========================================================
+#==============================================================================
+
+# assign a project description
+project(hangman_game
+    VERSION 1.0 
+    DESCRIPTION "The hangman game"
+    LANGUAGES CXX)
+
+# make the list of source files
+file(GLOB sources *.c *.cpp *.h *.hpp *.ipp)
+
+# make the list of libraries
+# set(libs ${libs}
+#     mcl)
+
+# make the list of frameworks
+# set(apple_frameworks ${apple_frameworks}
+#    Accelerate)
+
+#==============================================================================
+#==============================================================================
+
+
+# CMAKE main
+#------------------------------------------------------------------------------
+# add exacutable target
+add_executable(${PROJECT_NAME} ${sources})
+
+# specific parameters for Windows
+#----------------------------------------
+if(WIN32)
+    # set OS specific path
+    set(os_directory win_bin)
+    #...
+endif()
+
+# specific parameters for Apple
+#----------------------------------------
+if(APPLE)
+    # set OS specific path
+    set(os_directory mac_bin)
+
+    # add frameworks
+#     add_apple_framework(${apple_frameworks})
+
+    # set optimization levels for different build type
+    set(CMAKE_CXX_FLAGS "-fdiagnostics-color=always -pedantic -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
+# specific parameters for Linux
+#----------------------------------------
+if(UNIX AND NOT APPLE)
+    # set OS specific path
+    set(os_directory lnx_bin)
+    # set optimization levels for different build type
+    set(CMAKE_CXX_FLAGS "-fdiagnostics-color=always -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
+# set the output path
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${os_directory}/Debug"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${os_directory}/Release")
+
+# set C/C++ standard
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED YES
+    C_EXTENSIONS NO
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
+
